@@ -1,20 +1,5 @@
 package com.nilhcem.fakesmtp.gui.tab;
 
-import com.nilhcem.fakesmtp.core.ArgsHandler;
-import com.nilhcem.fakesmtp.core.Configuration;
-import com.nilhcem.fakesmtp.core.I18n;
-import com.nilhcem.fakesmtp.gui.info.ClearAllButton;
-import com.nilhcem.fakesmtp.model.EmailModel;
-import com.nilhcem.fakesmtp.model.UIModel;
-import com.nilhcem.fakesmtp.server.MailSaver;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
-import javax.mail.internet.MimeUtility;
-import javax.swing.JOptionPane;
-import javax.swing.JScrollPane;
-import javax.swing.JTable;
-import javax.swing.table.DefaultTableModel;
 import java.awt.Desktop;
 import java.awt.Rectangle;
 import java.awt.event.ComponentAdapter;
@@ -27,6 +12,24 @@ import java.io.UnsupportedEncodingException;
 import java.text.SimpleDateFormat;
 import java.util.Observable;
 import java.util.Observer;
+
+import javax.mail.internet.MimeUtility;
+import javax.swing.JOptionPane;
+import javax.swing.JScrollPane;
+import javax.swing.JTable;
+import javax.swing.table.DefaultTableModel;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import com.nilhcem.fakesmtp.core.ArgsHandler;
+import com.nilhcem.fakesmtp.core.Configuration;
+import com.nilhcem.fakesmtp.core.I18n;
+import com.nilhcem.fakesmtp.gui.info.ClearAllButton;
+import com.nilhcem.fakesmtp.model.EmailModel;
+import com.nilhcem.fakesmtp.model.UIModel;
+import com.nilhcem.fakesmtp.server.MailLoader;
+import com.nilhcem.fakesmtp.server.MailSaver;
 
 /**
  * Scrolled table where will be displayed every received email (one line for each email).
@@ -199,7 +202,8 @@ public final class MailsListPane implements Observer {
 	 */
 	@Override
 	public void update(Observable o, Object arg) {
-		if (o instanceof MailSaver) {
+		if (o instanceof MailSaver || o instanceof MailLoader) {
+			LOGGER.info("Showing new email in list pane");
 			EmailModel email = (EmailModel) arg;
 			String subject;
 			try {

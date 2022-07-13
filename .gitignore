@@ -2,6 +2,9 @@
 *~
 \#*
 
+# Bin folder
+bin/ 
+
 # Target folder
 target/
 

@@ -4,6 +4,7 @@ import com.nilhcem.fakesmtp.core.ArgsHandler;
 import com.nilhcem.fakesmtp.core.I18n;
 import com.nilhcem.fakesmtp.gui.listeners.AboutActionListener;
 import com.nilhcem.fakesmtp.gui.listeners.ExitActionListener;
+import com.nilhcem.fakesmtp.gui.listeners.LoadActionListener;
 
 import javax.swing.JMenu;
 import javax.swing.JMenuBar;
@@ -55,6 +56,12 @@ public final class MenuBar extends Observable {
 	private JMenu createFileMenu() {
 		JMenu fileMenu = new JMenu(i18n.get("menubar.file"));
 		fileMenu.setMnemonic(i18n.get("menubar.mnemo.file").charAt(0));
+
+		JMenuItem load = new JMenuItem(i18n.get("menubar.load"));
+		load.setMnemonic(i18n.get("menubar.mnemo.load").charAt(0));
+		load.addActionListener(new LoadActionListener(mainFrame));
+
+		fileMenu.add(load);
 
 		JMenuItem exit = new JMenuItem(i18n.get("menubar.exit"));
 		exit.setMnemonic(i18n.get("menubar.mnemo.exit").charAt(0));

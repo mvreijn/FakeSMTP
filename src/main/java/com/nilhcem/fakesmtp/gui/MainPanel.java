@@ -10,6 +10,7 @@ import com.nilhcem.fakesmtp.gui.info.StartServerButton;
 import com.nilhcem.fakesmtp.gui.tab.LastMailPane;
 import com.nilhcem.fakesmtp.gui.tab.LogsPane;
 import com.nilhcem.fakesmtp.gui.tab.MailsListPane;
+import com.nilhcem.fakesmtp.server.MailLoader;
 import com.nilhcem.fakesmtp.server.MailSaver;
 import com.nilhcem.fakesmtp.server.SMTPServerHandler;
 import net.miginfocom.swing.MigLayout;
@@ -115,6 +116,10 @@ public final class MainPanel {
 
 		// Once we chose a directory
 		dirChooser.addObserver(saveMsgTextField);
+
+		MailLoader mailLoader = SMTPServerHandler.INSTANCE.getMailLoader();
+		mailLoader.addObserver(nbReceivedLabel);
+		mailLoader.addObserver(mailsListPane);
 
 		// When a message is received
 		MailSaver mailSaver = SMTPServerHandler.INSTANCE.getMailSaver();
