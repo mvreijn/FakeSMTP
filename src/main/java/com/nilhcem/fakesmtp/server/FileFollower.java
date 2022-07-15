@@ -1,5 +1,9 @@
 package com.nilhcem.fakesmtp.server;
 
+import static java.nio.file.LinkOption.NOFOLLOW_LINKS;
+import static java.nio.file.StandardWatchEventKinds.ENTRY_CREATE;
+import static java.nio.file.StandardWatchEventKinds.OVERFLOW;
+
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileInputStream;
@@ -9,9 +13,16 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.StringReader;
 import java.nio.charset.StandardCharsets;
+import java.nio.file.FileSystem;
+import java.nio.file.FileSystems;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.nio.file.PathMatcher;
 import java.nio.file.Paths;
+import java.nio.file.WatchEvent;
+import java.nio.file.WatchEvent.Kind;
+import java.nio.file.WatchKey;
+import java.nio.file.WatchService;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
@@ -23,16 +34,17 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.nilhcem.fakesmtp.model.EmailModel;
+import com.nilhcem.fakesmtp.model.UIModel;
 
 /**
  * Saves emails and notifies components so they can refresh their views with new data.
  *
- * @author Nilhcem
- * @since 1.0
+ * @author mvreijn
+ * @since 2.3
  */
-public final class MailLoader extends Observable {
+public final class FileFollower extends Observable implements Runnable {
 
-	private static final Logger LOGGER = LoggerFactory.getLogger(MailLoader.class);
+	private static final Logger LOGGER = LoggerFactory.getLogger(FileFollower.class);
 	private static final String LINE_SEPARATOR = System.getProperty("line.separator");
 	// This can be a static variable since it is Thread Safe
 	private static final Pattern SUBJECT_PATTERN = Pattern.compile("^Subject: (.*)$");
@@ -49,25 +61,71 @@ public final class MailLoader extends Observable {
 	 * @param filePath the save path containing the email files.
 	 * @see com.nilhcem.fakesmtp.gui.MainPanel#addObservers to see which observers will be notified
 	 */
-	public void loadEmailsAndNotify(String filePath) 
+	public void startFollowingFiles(String filePath) 
 	{
-		Path pth = Paths.get(filePath);
-		try
+		Path dir = Paths.get(filePath);
+		PathMatcher matcher = FileSystems.getDefault().getPathMatcher("glob:*.eml");
+
+		if (Files.isDirectory(dir, NOFOLLOW_LINKS))
 		{
-			Files.walk(pth)
-				.filter(Files::isRegularFile)
-				.forEach(e -> readEmailFromFile(e.toFile()));
+	        // We obtain the file system from the dir
+	        FileSystem fs = dir.getFileSystem();
+	        try (WatchService service = fs.newWatchService()) 
+	        {
+	            // We register the path to the service
+	            // We watch for creation events
+	            dir.register(service, ENTRY_CREATE);
+	            // Start the infinite polling loop
+	            WatchKey key = null;
+	            while (true) 
+	            {
+	                key = service.take();
+
+	                // Dequeueing events
+	                Kind<?> kind = null;
+	                for (WatchEvent<?> watchEvent : key.pollEvents()) 
+	                {
+	                    // Get the type of the event
+	                    kind = watchEvent.kind();
+	                    if (OVERFLOW == kind) 
+	                    {
+	                        continue; // loop
+	                    } 
+	                    else if (ENTRY_CREATE == kind) 
+	                    {
+	                        @SuppressWarnings( "unchecked" )
+							WatchEvent<Path> ev = (WatchEvent<Path>)watchEvent;
+	                        Path newPath = ev.context();
+	                        LOGGER.debug("Detected new file {}", newPath);
+	                        // Check for file type and extension
+	                        if (newPath != null && matcher.matches(newPath))
+	                        {
+	                        	// OK add this email to the list
+		                        LOGGER.trace("It's an *.eml file");
+		                        File path = new File(dir.toFile(), newPath.toString());
+		                        readEmailFromFile(path);
+	                        }
+	                    }
+	                }
+
+	                if (!key.reset()) 
+	                {
+	                    break; // loop
+	                }
+	            }
+	        }
+	        catch (IOException | InterruptedException e) 
+	        {
+	        	//
+	        	System.out.println("Exception: "+e.getClass().getName());
+	        	return;
+	        }
 		}
-		catch (IOException e)
-		{
-			LOGGER.warn("Could not load emails: {}", e.getMessage());
-		}
-		
 	}
 
 	private void readEmailFromFile(File eml)
 	{
-		LOGGER.info("Loading email {}", eml.getName());
+		LOGGER.info("Loading email {} from {}", eml.getName(), eml.getAbsolutePath());
 		InputStream data;
 		try
 		{
@@ -260,5 +318,11 @@ public final class MailLoader extends Observable {
 			LOGGER.error("", e);
 		}
 		return "";
+	}
+
+	@Override
+	public void run()
+	{
+		startFollowingFiles(UIModel.INSTANCE.getSavePath());
 	}
 }

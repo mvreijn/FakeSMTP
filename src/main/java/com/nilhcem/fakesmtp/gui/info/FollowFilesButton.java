@@ -8,22 +8,18 @@ import javax.swing.JOptionPane;
 
 import com.nilhcem.fakesmtp.core.Configuration;
 import com.nilhcem.fakesmtp.core.I18n;
-import com.nilhcem.fakesmtp.core.exception.BindPortException;
-import com.nilhcem.fakesmtp.core.exception.InvalidHostException;
-import com.nilhcem.fakesmtp.core.exception.InvalidPortException;
-import com.nilhcem.fakesmtp.core.exception.OutOfRangePortException;
 import com.nilhcem.fakesmtp.model.UIModel;
 
 /**
- * Button to start the SMTP server.
+ * Button to follow the email file directory for changes
  *
- * @author Nilhcem
- * @since 1.0
+ * @author mvreijn
+ * @since 2.1
  */
-public final class StartServerButton extends Observable implements Observer {
+public final class FollowFilesButton extends Observable implements Observer {
 	private final I18n i18n = I18n.INSTANCE;
 
-	private final JButton button = new JButton(i18n.get("startsrv.start"));
+	private final JButton button = new JButton(i18n.get("files.follow"));
 
 	/**
 	 * Creates a start button to start the SMTP server.
@@ -31,7 +27,7 @@ public final class StartServerButton extends Observable implements Observer {
 	 * If the user selects a wrong port before starting the server, the method will display an error message.
 	 * </p>
 	 */
-	public StartServerButton() {
+	public FollowFilesButton() {
 		button.addActionListener(e -> toggleButton());
 	}
 
@@ -42,22 +38,15 @@ public final class StartServerButton extends Observable implements Observer {
 	 */
 	public void toggleButton() {
 		try {
-			UIModel.INSTANCE.toggleButton();
-		} catch (InvalidHostException ihe) {
-			displayError(String.format(i18n.get("startsrv.err.invalidHost"), ihe.getHost()));
-		} catch (InvalidPortException ipe) {
-			displayError(String.format(i18n.get("startsrv.err.invalidPort")));
-		} catch (BindPortException bpe) {
-			displayError(String.format(i18n.get("startsrv.err.bound"), bpe.getPort()));
-		} catch (OutOfRangePortException orpe) {
-			displayError(String.format(i18n.get("startsrv.err.range"), orpe.getPort()));
+			UIModel.INSTANCE.toggleFollowButton();
 		} catch (RuntimeException re) {
-			displayError(String.format(i18n.get("startsrv.err.default"), re.getMessage()));
+			displayError(String.format(i18n.get("files.err.default"), re.getMessage()));
 		}
 
-		if (UIModel.INSTANCE.isStarted()) {
-			button.setText(i18n.get("startsrv.started"));
-			button.setEnabled(false);
+		if (UIModel.INSTANCE.isFollowing()) {
+			button.setText(i18n.get("files.following"));
+		} else {
+			button.setText(i18n.get("files.follow"));
 		}
 		setChanged();
 		notifyObservers();

@@ -11,6 +11,7 @@ import org.slf4j.LoggerFactory;
 
 import com.apple.eawt.Application;
 import com.nilhcem.fakesmtp.model.UIModel;
+import com.nilhcem.fakesmtp.server.FileFollower;
 import com.nilhcem.fakesmtp.server.MailLoader;
 import com.nilhcem.fakesmtp.server.MailSaver;
 
@@ -59,7 +60,7 @@ public final class NbReceivedLabel implements Observer {
 	 */
 	@Override
 	public void update(Observable o, Object arg) {
-		if (o instanceof MailSaver || o instanceof MailLoader) {
+		if (o instanceof MailSaver || o instanceof MailLoader || o instanceof FileFollower) {
 			UIModel model = UIModel.INSTANCE;
 			int countMsg = model.getNbMessageReceived() + 1;
 			String countMsgStr = Integer.toString(countMsg);

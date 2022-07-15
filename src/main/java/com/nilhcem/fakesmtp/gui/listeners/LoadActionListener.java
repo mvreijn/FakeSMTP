@@ -9,7 +9,6 @@ import org.slf4j.LoggerFactory;
 import com.nilhcem.fakesmtp.gui.MainFrame;
 import com.nilhcem.fakesmtp.model.UIModel;
 import com.nilhcem.fakesmtp.server.MailLoader;
-import com.nilhcem.fakesmtp.server.SMTPServerHandler;
 
 /**
  * Implements the Load messages action.
@@ -37,7 +36,7 @@ public class LoadActionListener implements ActionListener {
 	{
 		String filePath = UIModel.INSTANCE.getSavePath();
 		LOGGER.info("Loading emails from {}", filePath);
-		MailLoader loader = SMTPServerHandler.INSTANCE.getMailLoader();
+		MailLoader loader = UIModel.INSTANCE.getMailLoader();
 		loader.loadEmailsAndNotify(filePath);
 	}
 }

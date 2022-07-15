@@ -5,6 +5,8 @@ import com.nilhcem.fakesmtp.core.exception.BindPortException;
 import com.nilhcem.fakesmtp.core.exception.InvalidHostException;
 import com.nilhcem.fakesmtp.core.exception.InvalidPortException;
 import com.nilhcem.fakesmtp.core.exception.OutOfRangePortException;
+import com.nilhcem.fakesmtp.server.FileFollower;
+import com.nilhcem.fakesmtp.server.MailLoader;
 import com.nilhcem.fakesmtp.server.SMTPServerHandler;
 
 import java.net.InetAddress;
@@ -32,8 +34,13 @@ public enum UIModel {
 	private String hostStr;
 	private int nbMessageReceived = 0;
 	private String savePath = I18n.INSTANCE.get("emails.default.dir");
+	private boolean following = false;
 	private final Map<Integer, String> listMailsMap = new HashMap<>();
 	private List<String> relayDomains;
+
+	private final MailLoader mailLoader = new MailLoader();
+	private final FileFollower fileFollower = new FileFollower();
+	private Thread followThread;
 
 	UIModel() {
 	}
@@ -69,6 +76,37 @@ public enum UIModel {
 			}
 		}
 		started = !started;
+	}
+
+	public void toggleFollowButton()
+	{
+		if (following)
+		{
+			// Stop the watcher
+			followThread.interrupt();
+		}
+		else
+		{
+			// Start the watcher
+			followThread = new Thread(fileFollower);
+			followThread.start();
+		}
+		following = !following;
+	}
+
+	/**
+	 * Returns {@code true} if the panel is following the savedir.
+	 *
+	 * @return {@code true} if the panel is following the savedir.
+	 */
+	public boolean isFollowing() 
+	{
+		return following;
+	}
+
+	public MailLoader getMailLoader()
+	{
+		return mailLoader;
 	}
 
 	/**
@@ -114,5 +152,10 @@ public enum UIModel {
 
 	public void setRelayDomains(List<String> relayDomains) {
 		this.relayDomains = relayDomains;
+	}
+
+	public FileFollower getFileFollower()
+	{
+		return fileFollower;
 	}
 }

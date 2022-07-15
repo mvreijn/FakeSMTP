@@ -1,13 +1,17 @@
 package com.nilhcem.fakesmtp.gui.info;
 
-import com.nilhcem.fakesmtp.core.Configuration;
-import com.nilhcem.fakesmtp.core.I18n;
-import com.nilhcem.fakesmtp.server.MailSaver;
-import com.nilhcem.fakesmtp.server.SMTPServerHandler;
-
-import javax.swing.*;
 import java.util.Observable;
 import java.util.Observer;
+
+import javax.swing.JButton;
+import javax.swing.JOptionPane;
+
+import com.nilhcem.fakesmtp.core.Configuration;
+import com.nilhcem.fakesmtp.core.I18n;
+import com.nilhcem.fakesmtp.server.FileFollower;
+import com.nilhcem.fakesmtp.server.MailLoader;
+import com.nilhcem.fakesmtp.server.MailSaver;
+import com.nilhcem.fakesmtp.server.SMTPServerHandler;
 
 /**
  * Button to clear all the information from the main panel.
@@ -72,7 +76,7 @@ public final class ClearAllButton extends Observable implements Observer {
 	 */
 	@Override
 	public void update(Observable o, Object arg) {
-		if (o instanceof MailSaver && !button.isEnabled()) {
+		if ((o instanceof MailSaver || o instanceof MailLoader || o instanceof FileFollower) && !button.isEnabled()) {
 			button.setEnabled(true);
 		}
 	}

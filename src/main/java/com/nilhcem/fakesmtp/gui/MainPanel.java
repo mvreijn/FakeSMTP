@@ -1,8 +1,15 @@
 package com.nilhcem.fakesmtp.gui;
 
+import java.util.Observable;
+
+import javax.swing.JLabel;
+import javax.swing.JPanel;
+import javax.swing.JTabbedPane;
+
 import com.nilhcem.fakesmtp.core.ArgsHandler;
 import com.nilhcem.fakesmtp.core.I18n;
 import com.nilhcem.fakesmtp.gui.info.ClearAllButton;
+import com.nilhcem.fakesmtp.gui.info.FollowFilesButton;
 import com.nilhcem.fakesmtp.gui.info.NbReceivedLabel;
 import com.nilhcem.fakesmtp.gui.info.PortTextField;
 import com.nilhcem.fakesmtp.gui.info.SaveMsgField;
@@ -10,15 +17,13 @@ import com.nilhcem.fakesmtp.gui.info.StartServerButton;
 import com.nilhcem.fakesmtp.gui.tab.LastMailPane;
 import com.nilhcem.fakesmtp.gui.tab.LogsPane;
 import com.nilhcem.fakesmtp.gui.tab.MailsListPane;
+import com.nilhcem.fakesmtp.model.UIModel;
+import com.nilhcem.fakesmtp.server.FileFollower;
 import com.nilhcem.fakesmtp.server.MailLoader;
 import com.nilhcem.fakesmtp.server.MailSaver;
 import com.nilhcem.fakesmtp.server.SMTPServerHandler;
-import net.miginfocom.swing.MigLayout;
 
-import javax.swing.JLabel;
-import javax.swing.JPanel;
-import javax.swing.JTabbedPane;
-import java.util.Observable;
+import net.miginfocom.swing.MigLayout;
 
 /**
  * Provides the main panel of the application, which will contain all the components.
@@ -59,6 +64,9 @@ public final class MainPanel {
 	private final MailsListPane mailsListPane = new MailsListPane();
 	private final LastMailPane lastMailPane = new LastMailPane();
 
+	// Follow files
+	private final FollowFilesButton followFiles = new FollowFilesButton();
+	
 	// Clear all
 	private final ClearAllButton clearAll = new ClearAllButton();
 
@@ -117,9 +125,16 @@ public final class MainPanel {
 		// Once we chose a directory
 		dirChooser.addObserver(saveMsgTextField);
 
-		MailLoader mailLoader = SMTPServerHandler.INSTANCE.getMailLoader();
+		FileFollower follower = UIModel.INSTANCE.getFileFollower();
+		follower.addObserver(nbReceivedLabel);
+		follower.addObserver(mailsListPane);
+		follower.addObserver(clearAll);
+
+		// When the mail messages are loaded from the savedir
+		MailLoader mailLoader = UIModel.INSTANCE.getMailLoader();
 		mailLoader.addObserver(nbReceivedLabel);
 		mailLoader.addObserver(mailsListPane);
+		mailLoader.addObserver(clearAll);
 
 		// When a message is received
 		MailSaver mailSaver = SMTPServerHandler.INSTANCE.getMailSaver();
@@ -158,6 +173,8 @@ public final class MainPanel {
 		tabbedPane.add(lastMailPane.get(), i18n.get("mainpanel.tab.lastmessage"));
 		mainPanel.add(tabbedPane, "span, grow");
 
+		// Follow files
+		mainPanel.add(followFiles.get(), "span, center");
 		// Clear all
 		mainPanel.add(clearAll.get(), "span, center");
 	}

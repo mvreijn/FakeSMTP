@@ -28,6 +28,7 @@ import com.nilhcem.fakesmtp.core.I18n;
 import com.nilhcem.fakesmtp.gui.info.ClearAllButton;
 import com.nilhcem.fakesmtp.model.EmailModel;
 import com.nilhcem.fakesmtp.model.UIModel;
+import com.nilhcem.fakesmtp.server.FileFollower;
 import com.nilhcem.fakesmtp.server.MailLoader;
 import com.nilhcem.fakesmtp.server.MailSaver;
 
@@ -202,7 +203,7 @@ public final class MailsListPane implements Observer {
 	 */
 	@Override
 	public void update(Observable o, Object arg) {
-		if (o instanceof MailSaver || o instanceof MailLoader) {
+		if (o instanceof MailSaver || o instanceof MailLoader || o instanceof FileFollower) {
 			LOGGER.info("Showing new email in list pane");
 			EmailModel email = (EmailModel) arg;
 			String subject;
