@@ -118,6 +118,10 @@ public final class MainPanel {
 
 		// When we click on "start server" button
 		startServerBtn.addObserver(portText);
+		startServerBtn.addObserver(followFiles);
+
+		// When we click "follow files" button
+		followFiles.addObserver(startServerBtn);
 
 		// When we press "Enter" on the PortTextField
 		portText.addObserver(startServerBtn);

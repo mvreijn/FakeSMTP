@@ -74,8 +74,9 @@ public final class FollowFilesButton extends Observable implements Observer {
 
 	@Override
 	public void update(Observable o, Object arg) {
-		if (o instanceof PortTextField) {
-			toggleButton();
+		if (o instanceof StartServerButton) {
+			// toggle button state
+			button.setEnabled(!button.isEnabled());
 		}
 	}
 }

@@ -87,6 +87,9 @@ public final class StartServerButton extends Observable implements Observer {
 	public void update(Observable o, Object arg) {
 		if (o instanceof PortTextField) {
 			toggleButton();
+		} else if (o instanceof FollowFilesButton) {
+			// toggle button state
+			button.setEnabled(!button.isEnabled());
 		}
 	}
 }
