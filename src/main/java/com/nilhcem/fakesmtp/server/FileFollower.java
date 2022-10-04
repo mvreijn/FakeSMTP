@@ -37,7 +37,7 @@ import com.nilhcem.fakesmtp.model.EmailModel;
 import com.nilhcem.fakesmtp.model.UIModel;
 
 /**
- * Saves emails and notifies components so they can refresh their views with new data.
+ * Watches the email directory and notifies components so they can refresh their views when new files have been saved.
  *
  * @author mvreijn
  * @since 2.3

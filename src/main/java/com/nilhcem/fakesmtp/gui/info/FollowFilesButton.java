@@ -74,8 +74,8 @@ public final class FollowFilesButton extends Observable implements Observer {
 
 	@Override
 	public void update(Observable o, Object arg) {
-		if (o instanceof StartServerButton) {
-			// toggle button state
+		if (o instanceof StartServerButton && UIModel.INSTANCE.isStarted()) {
+			// toggle button state, if the observable is the start button and the result is started
 			button.setEnabled(!button.isEnabled());
 		}
 	}

@@ -40,15 +40,20 @@ public final class StartServerButton extends Observable implements Observer {
 	 *
 	 * @see PortTextField
 	 */
-	public void toggleButton() {
+	public void toggleButton() 
+	{
+		// Allow certain errors to signal no success and no notify()
+		boolean success = false;
 		try {
 			UIModel.INSTANCE.toggleButton();
+			success = true;
 		} catch (InvalidHostException ihe) {
 			displayError(String.format(i18n.get("startsrv.err.invalidHost"), ihe.getHost()));
 		} catch (InvalidPortException ipe) {
 			displayError(String.format(i18n.get("startsrv.err.invalidPort")));
 		} catch (BindPortException bpe) {
 			displayError(String.format(i18n.get("startsrv.err.bound"), bpe.getPort()));
+			// assumption: this means server already started and follow option should be available
 		} catch (OutOfRangePortException orpe) {
 			displayError(String.format(i18n.get("startsrv.err.range"), orpe.getPort()));
 		} catch (RuntimeException re) {
@@ -59,8 +64,11 @@ public final class StartServerButton extends Observable implements Observer {
 			button.setText(i18n.get("startsrv.started"));
 			button.setEnabled(false);
 		}
-		setChanged();
-		notifyObservers();
+		if (success)
+		{
+			setChanged();
+			notifyObservers();
+		}
 	}
 
 	/**
